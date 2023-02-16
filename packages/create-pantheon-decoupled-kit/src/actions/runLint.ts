@@ -1,25 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import chalk from 'chalk';
-import whichPmRuns from 'which-pm-runs';
 import { execSync } from 'child_process';
 import path from 'path';
-import type { BaseConfig } from '../types';
+import whichPmRuns from 'which-pm-runs';
+import { Action, isString } from '../types';
 
-export interface LintConfig extends BaseConfig {
-	// noInstall: boolean;
-	// noLint: boolean;
-	ignorePattern: string;
-	plugins: string;
-}
-
-export const runLint = async ({
-	config: { data, ignorePattern, plugins },
-}: {
-	config: LintConfig;
+export const runLint: Action = async ({
+	data: { ignorePattern, plugins, ...data },
 }) => {
 	if (data?.noInstall || data?.noLint) return 'skipping linting';
-	if (!data.outDir || typeof data?.outDir !== 'string')
-		throw 'fail: outDir required';
+	if (!data.outDir || !isString(data?.outDir)) throw 'fail: outDir required';
 	data.silent || console.log(chalk.green('Linting...'));
 
 	const getPkgManager = whichPmRuns();
@@ -41,6 +31,8 @@ export const runLint = async ({
 		if (pkg?.scripts?.lint) {
 			execSync(`${command} lint`, { cwd: data.outDir, stdio: 'inherit' });
 		} else {
+			const plugins = isString(data.plugins) && data.plugins;
+			const ignorePattern = isString(data.ignorePattern) && data.ignorePattern;
 			execSync(
 				`npx eslint ${
 					ignorePattern ? `--ignore-pattern ${ignorePattern}` : ''
@@ -52,5 +44,5 @@ export const runLint = async ({
 		console.error(error);
 		throw 'fail: there was a problem linting';
 	}
-	return 'success';
+	return 'runLint: success';
 };

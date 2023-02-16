@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 import { execSync } from 'child_process';
 import whichPmRuns from 'which-pm-runs';
-import type { BaseConfig } from '../types';
+import type { Action } from '../types';
 
-export const runInstall = ({ config: { data } }: { config: BaseConfig }) => {
+export const runInstall: Action = ({ data }) => {
 	if (data?.noInstall) return 'skipping install';
 	if (typeof data?.outDir !== 'string')
 		throw new Error('valid outDir required');

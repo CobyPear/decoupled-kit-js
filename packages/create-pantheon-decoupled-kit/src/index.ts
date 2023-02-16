@@ -18,8 +18,6 @@ import pkg from '../package.json' assert { type: 'json' };
 import { getHandlebarsInstance } from './utils/handlebars';
 const rootDir = new URL('.', import.meta.url).pathname;
 
-const hbs = await getHandlebarsInstance(rootDir);
-
 //console.log(hbs);
 
 console.log('generators', decoupledKitGenerators);
@@ -41,24 +39,26 @@ export const parseArgs = (
 	const options: MinimistOptions = {
 		// these options tell minimist which --args are
 		// booleans and which are strings.
-		boolean: ['force', 'silent', 'help', 'h', 'version', 'v'],
+		boolean: ['force', 'silent'],
 		string: ['appName', 'outDir'],
+		alias: {
+			help: ['h', 'help'],
+			version: ['v', 'version'],
+		},
 	};
 	const args: ParsedArgs = minimist(cliArgs, options);
 
 	return args;
 };
 
-const getGeneratorList = (
-	generators: DecoupledKitGenerator<{ [key: string]: string }, unknown>[],
-) => {
+const getGeneratorList = (generators: typeof decoupledKitGenerators) => {
 	return generators.map(({ name }: { name: string }) => ({ name }));
 };
 
 const getGenerator = (generatorName: string) => {
 	return decoupledKitGenerators.find(
 		({ name }) => name === generatorName,
-	) as DecoupledKitGenerator<{ [key: string]: string }, unknown>;
+	) as DecoupledKitGenerator<{ [key: string]: string }>;
 };
 /**
  * Initializes the CLI prompts based on parsed arguments
@@ -69,10 +69,7 @@ const getGenerator = (generatorName: string) => {
  */
 export const main = async (
 	args: ParsedArgs,
-	DecoupledKitGenerators: DecoupledKitGenerator<
-		{ [key: string]: any },
-		unknown
-	>[],
+	DecoupledKitGenerators: typeof decoupledKitGenerators,
 ): Promise<void> => {
 	// get a list of generators to map against positional arguments from the cli
 	const generators = getGeneratorList(DecoupledKitGenerators);
@@ -140,34 +137,32 @@ export const main = async (
 			generator.prompts as QuestionCollection,
 			args,
 		);
-		// Add any prompts to args so we don't ask the same
+		// Add any prompts to args object so we don't ask the same
 		// prompt twice
 		Object.assign(args, answers);
+		// if generator data exists, add it to the args object
+		generator.data && Object.assign(args, generator.data);
+		// if a generator is an addon, note it in an 'addons' section of the args
+		if (generator.addon) {
+			Array.isArray(args.addons)
+				? args.addons.push(generator.name)
+				: (args.addons = [generator.name]);
+		}
 
 		// gather all actions and templates
 		actions.push(...generator.actions);
 		templates.push(...generator.templates);
-		// use the harvested answers (if any) to run the plop actions
-		// aka the meat of the generators
-		// const { changes, failures } = await generator.runActions(answers);
-		// if (failures.length) {
-		// 	args.silent ||
-		// 		failures.forEach(({ error }) => console.error(chalk.red(error)));
-		// }
-		// if (changes.length) {
-		// 	args.silent ||
-		// 		changes.forEach(({ type, path }) =>
-		// 			console.log(chalk.green(type), chalk.cyan(path)),
-		// 		);
-		// }
 	}
+	console.debug('data:', args);
 
-	await actionRunner({ actions, templates });
+	// pass the handlebars instance into data so it is available
+	// to any action that needs it
+	const hbs = await getHandlebarsInstance(rootDir);
+
+	await actionRunner({
+		actions,
+		templates,
+		data: { ...args, handlebars: hbs },
+	});
 };
-await main(
-	parseArgs(),
-	decoupledKitGenerators as DecoupledKitGenerator<
-		{ [key: string]: any },
-		unknown
-	>[],
-);
+await main(parseArgs(), decoupledKitGenerators);

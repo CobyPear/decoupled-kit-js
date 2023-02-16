@@ -8,32 +8,19 @@ declare module 'vitest' {
 }
 
 /**
- * Minimum required config for an action.
+ * Input from command line arguments and/or prompts
  */
-export interface BaseConfig {
-	/**
-	 * User provided input via prompts or command line arguments
-	 */
-	data: Answers | ParsedArgs;
-	// /**
-	//  *
-	//  */
-	// type: ActionType;
-}
+export type Input = ParsedArgs & Answers;
+
+type DataMember = string | number | boolean;
+type DataRecord = {
+	[key: string]: DataMember | Record<string, DataRecord>;
+};
 
 /**
- * Valid action types
+ * Generators need prompts to get user data not provided by CLI arguments
  */
-// export type ActionType = 'addWithDiff' | 'runInstall' | 'runLint';
-
-export type ActionsTuple<Config extends unknown[]> = [
-	...(Config extends BaseConfig ? Config : never),
-];
-/**
- * Generators need prompts to get user data not provided by CLI arguments,
- *  and a config to pass to the action runner.
- */
-export interface DecoupledKitGenerator<Prompts extends Answers, Configs> {
+export interface DecoupledKitGenerator<Prompts extends Answers> {
 	/**
 	 * Generator's name. This should be kebab case.
 	 */
@@ -52,9 +39,13 @@ export interface DecoupledKitGenerator<Prompts extends Answers, Configs> {
 	 */
 	templates: string[];
 	/**
-	 * An array of valid action types
+	 * An array of actions to run with the prompts and templates
 	 */
-	actions: Action<ActionsTuple<[Configs]>>[];
+	actions: Action[];
+	/**
+	 * Any extra data that should be passed from the generator to the actions
+	 */
+	data?: DataRecord;
 	/**
 	 * Set to true if the generator is considered an addon.
 	 * This will give priority to the templates when de-duping.
@@ -62,23 +53,27 @@ export interface DecoupledKitGenerator<Prompts extends Answers, Configs> {
 	addon?: boolean;
 }
 
+export type Action = ({
+	data,
+	templates,
+}: {
+	data: Input;
+	templates: string[];
+}) => Promise<string> | string;
+
 // TODO: what will the action runner look like?
 // shape of actions may determine this
 // it should pool all action configs, dedupe templates,
 // and run actions in the most efficient order.
-export type ActionRunner<Configs> = ({
+export type ActionRunner = ({
 	actions,
-	configs,
+	templates,
+	data,
 }: {
-	actions: Action<ActionsTuple<[Configs]>>[];
-	configs: Configs[];
+	actions: Action[];
+	data: Input;
+	templates: string[];
 }) => Promise<string>;
-
-export type Action<ActionConfig extends BaseConfig> = ({
-	config,
-}: {
-	config: ActionConfig;
-}) => Promise<string> | string;
 
 // export type Action = () => Promise<string> | string;
 
@@ -94,3 +89,16 @@ export type Action<ActionConfig extends BaseConfig> = ({
 // abstract class ActionFactory<Config extends BaseConfig> {
 // 	create: (config: Config)
 // }
+
+// TYPE PREDICATES
+
+/**
+ * @param arg a variable
+ * @returns true if the variable is a string, false otherwise
+ */
+export const isString = (arg: unknown): arg is string => {
+	if (typeof arg === 'string') {
+		return true;
+	}
+	return false;
+};

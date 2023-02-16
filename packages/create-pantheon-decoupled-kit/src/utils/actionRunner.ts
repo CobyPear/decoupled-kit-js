@@ -1,24 +1,29 @@
 // import path from 'path';
-import type { Action, ActionsTuple } from '../types';
+import chalk from 'chalk';
+import { ParsedArgs } from 'minimist';
+import type { ActionRunner } from '../types';
 
-export const actionRunner = async <Configs>({
+export const actionRunner: ActionRunner = async ({
 	actions,
 	templates,
-}: {
-	actions: Action<ActionsTuple<[Configs]>>[];
-	templates: string[];
+	data,
 }) => {
 	// const actionsPath = path.resolve('..', 'actions');
 	actions = [...new Set(actions)];
 	console.debug('actions', actions);
 	console.debug('templates:', templates);
+	console.debug('data:', data);
 
-	for await (const action of actions) {
-		console.debug('action:', action);
-
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-		// const fn = await import(`${actionsPath}/${action}.ts`);
+	try {
+		for await (const action of actions) {
+			console.debug('action:', action, await action({ data, templates }));
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			// const fn = await import(`${actionsPath}/${action}.ts`);
+		}
+		return '';
+	} catch (error) {
+		console.log(chalk.red('Something went wrong'));
+		console.error(error);
+		throw error;
 	}
-
-	return '';
 };

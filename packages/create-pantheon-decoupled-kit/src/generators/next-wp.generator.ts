@@ -1,17 +1,12 @@
 import { addWithDiff, runInstall, runLint } from '../actions';
-import type { LintConfig } from '../actions/runLint';
-import type { AddWithDiffConfig } from '../actions/addWithDiff';
-import type { DecoupledKitGenerator, BaseConfig } from '../types';
+import type { DecoupledKitGenerator } from '../types';
 
 interface NextWPAnswers {
 	appName: string;
 	outDir: string;
 }
 
-export const nextWp: DecoupledKitGenerator<
-	NextWPAnswers,
-	[AddWithDiffConfig, BaseConfig, LintConfig]
-> = {
+export const nextWp: DecoupledKitGenerator<NextWPAnswers> = {
 	name: 'next-wp',
 	description: 'Next.js + WordPress starter kit',
 	prompts: [
@@ -27,7 +22,7 @@ export const nextWp: DecoupledKitGenerator<
 				`${process.cwd()}/${appName.replaceAll(' ', '-').toLowerCase()}`,
 		},
 	],
-	templates: ['./templates/next-wp'],
+	templates: ['templates/next-wp'],
 	actions: [addWithDiff, runInstall, runLint],
 };
 

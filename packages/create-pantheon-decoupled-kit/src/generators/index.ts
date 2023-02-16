@@ -8,4 +8,4 @@ export const decoupledKitGenerators = [
 	gatsbyWp,
 	nextDrupal,
 	nextDrupalUmamiAddon,
-];
+] as const;

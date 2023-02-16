@@ -4,19 +4,13 @@ import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import klaw from 'klaw';
 import path from 'path';
+import { dedupeTemplates } from '../utils/dedupeTemplates';
 // import type { Answers, QuestionCollection } from 'inquirer';
 // import type { CustomActionConfig, NodePlopAPI } from 'node-plop';
-import { BaseConfig, Action } from '../types';
+import { Action } from '../types';
 // const __filename = new URL('.', import.meta.url).pathname;
-export interface AddWithDiffConfig extends BaseConfig {
-	templates: string[];
-}
 
-export const addWithDiff: Action<AddWithDiffConfig> = ({
-	config: { data, ...config },
-}: {
-	config: AddWithDiffConfig;
-}) => {
+export const addWithDiff: Action = ({ data, templates }) => {
 	/**
 	 * 1. get path to the templates
 	 * 2. klaw through templates (outputs each path in the directory given)
@@ -25,7 +19,8 @@ export const addWithDiff: Action<AddWithDiffConfig> = ({
 	 * 5. if the --force option is not defined, ask the user if we should overwrite this file (yes to all, yes, skip, abort) if force is true we write everything.
 	 * 6. skip or write the file based on input. If yes to all, set force to true.
 	 */
-	console.log('addWDiff Config', config);
+	console.debug('addWDiff data', data);
+	console.debug('templates:', templates);
 
 	const filesToCopyRegex =
 		/(gif|jpg|jpeg|tiff|png|svg|ashx|ico|pdf|jar|eot|woff|ttf|woff2)$/;
@@ -34,7 +29,10 @@ export const addWithDiff: Action<AddWithDiffConfig> = ({
 		skipped: [],
 		sameContent: [],
 	};
-	// const templates = dedupeTemplates()
+	const tempies = dedupeTemplates({
+		templates,
+		addons: Array.isArray(data.addons) ? (data.addons as string[]) : [],
+	});
 	// const templateDir: string = path.resolve(
 	// 	__filename
 	// 	config.templates,

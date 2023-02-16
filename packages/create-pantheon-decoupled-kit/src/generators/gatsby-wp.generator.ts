@@ -1,18 +1,14 @@
 import { addWithDiff, runInstall, runLint } from '../actions';
-import type { DecoupledKitGenerator, BaseConfig } from '../types';
-import type { LintConfig } from '../actions/runLint';
-import type { AddWithDiffConfig } from '../actions/addWithDiff';
+import type { DecoupledKitGenerator } from '../types';
 import whichPmRuns from 'which-pm-runs';
 
 interface GatsbyWPAnswers {
 	appName: string;
 	outDir: string;
 }
+const pnpm = whichPmRuns()?.name === 'pnpm' ? true : false;
 
-export const gatsbyWp: DecoupledKitGenerator<
-	GatsbyWPAnswers,
-	[AddWithDiffConfig, BaseConfig, LintConfig]
-> = {
+export const gatsbyWp: DecoupledKitGenerator<GatsbyWPAnswers> = {
 	name: 'gatsby-wp',
 	description: 'Gatsby + WordPress starter kit',
 	prompts: [
@@ -28,7 +24,10 @@ export const gatsbyWp: DecoupledKitGenerator<
 				`${process.cwd()}/${appName.replaceAll(' ', '-').toLowerCase()}`,
 		},
 	],
-	templates: ['./templates/gatsby-wp'],
+	data: {
+		gatsbyPnpmPlugin: pnpm,
+	},
+	templates: ['templates/gatsby-wp'],
 	actions: [addWithDiff, runInstall, runLint],
 
 	// actions: (data) => {

@@ -1,17 +1,11 @@
-import type { CustomActionConfig } from 'node-plop';
 import { addWithDiff, runInstall, runLint } from '../actions';
-import type { DecoupledKitGenerator, BaseConfig } from '../types';
-import type { LintConfig } from '../actions/runLint';
-import type { AddWithDiffConfig } from '../actions/addWithDiff';
+import type { DecoupledKitGenerator } from '../types';
 
 interface NextDrupalAnswers {
 	appName: string;
 	outDir: string;
 }
-export const nextDrupal: DecoupledKitGenerator<
-	NextDrupalAnswers,
-	[AddWithDiffConfig, BaseConfig, LintConfig]
-> = {
+export const nextDrupal: DecoupledKitGenerator<NextDrupalAnswers> = {
 	name: 'next-drupal',
 	description: 'Next.js + Drupal starter kit',
 	prompts: [
@@ -27,7 +21,7 @@ export const nextDrupal: DecoupledKitGenerator<
 				`${process.cwd()}/${appName.replaceAll(' ', '-').toLowerCase()}`,
 		},
 	],
-	templates: ['./templates/next-drupal'],
+	templates: ['templates/next-drupal'],
 	actions: [addWithDiff, runInstall, runLint],
 	// actions: (data) => {
 	// 	const addWithDiff: CustomActionConfig<'addWithDiff'> = {

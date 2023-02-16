@@ -8,7 +8,7 @@ const buildOptions = {
 	packages: 'external',
 	outdir: 'dist',
 	format: 'esm',
-	minify: true,
+	minify: false,
 	target: 'node16',
 	supported: {
 		'import-assertions': true,

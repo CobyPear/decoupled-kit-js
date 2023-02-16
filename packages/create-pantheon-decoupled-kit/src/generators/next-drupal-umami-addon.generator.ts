@@ -1,15 +1,10 @@
 import { addWithDiff, runLint } from '../actions';
 import type { DecoupledKitGenerator } from '../types';
-import type { LintConfig } from '../actions/runLint';
-import type { AddWithDiffConfig } from '../actions/addWithDiff';
 
 interface UmamiAddonAnswers {
 	outDir: string;
 }
-export const nextDrupalUmamiAddon: DecoupledKitGenerator<
-	UmamiAddonAnswers,
-	[AddWithDiffConfig, LintConfig]
-> = {
+export const nextDrupalUmamiAddon: DecoupledKitGenerator<UmamiAddonAnswers> = {
 	name: 'next-drupal-umami-addon',
 	description:
 		"Drupal's Umami profile data and components add-on for the next-drupal starter",
@@ -21,7 +16,11 @@ export const nextDrupalUmamiAddon: DecoupledKitGenerator<
 		},
 	],
 	addon: true,
-	templates: ['./templates/next-drupal-umami-addon'],
+	data: {
+		ignorePattern: 'test',
+		plugins: 'test234',
+	},
+	templates: ['templates/next-drupal-umami-addon'],
 	actions: [addWithDiff, runLint],
 	// actions: (data) => {
 	// 	const addWithDiff: CustomActionConfig<'addWithDiff'> = {
