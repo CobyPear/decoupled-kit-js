@@ -1,6 +1,7 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
+		"strictPropertyInitialization": false,
 		"types": ["vitest/globals"]
 	}
 }

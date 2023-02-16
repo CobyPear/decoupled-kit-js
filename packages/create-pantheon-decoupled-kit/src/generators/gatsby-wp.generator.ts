@@ -1,8 +1,18 @@
-import type { CustomActionConfig } from 'node-plop';
-import type { DecoupledKitGenerator } from '../types';
+import { addWithDiff, runInstall, runLint } from '../actions';
+import type { DecoupledKitGenerator, BaseConfig } from '../types';
+import type { LintConfig } from '../actions/runLint';
+import type { AddWithDiffConfig } from '../actions/addWithDiff';
 import whichPmRuns from 'which-pm-runs';
 
-export const gatsbyWp: DecoupledKitGenerator = {
+interface GatsbyWPAnswers {
+	appName: string;
+	outDir: string;
+}
+
+export const gatsbyWp: DecoupledKitGenerator<
+	GatsbyWPAnswers,
+	[AddWithDiffConfig, BaseConfig, LintConfig]
+> = {
 	name: 'gatsby-wp',
 	description: 'Gatsby + WordPress starter kit',
 	prompts: [
@@ -18,30 +28,33 @@ export const gatsbyWp: DecoupledKitGenerator = {
 				`${process.cwd()}/${appName.replaceAll(' ', '-').toLowerCase()}`,
 		},
 	],
-	actions: (data) => {
-		const pnpm = whichPmRuns()?.name === 'pnpm' ? true : false;
-		if (data) {
-			data.gatsbyPnpmPlugin = pnpm;
-		}
-		const addWithDiff: CustomActionConfig<'addWithDiff'> = {
-			type: 'addWithDiff',
-			templates: './templates/gatsby-wp',
-			path: '{{outDir}}',
-			force: data?.force ? Boolean(data.force) : false,
-		};
-		const runESLint: CustomActionConfig<'runLint'> = {
-			type: 'runLint',
-			ignorePattern: data?.ignorePattern
-				? String(data.ignorePattern)
-				: undefined,
-			plugins: data?.plugins ? String(data.plugins) : undefined,
-		};
-		const runInstall: CustomActionConfig<'runInstall'> = {
-			type: 'runInstall',
-		};
+	templates: ['./templates/gatsby-wp'],
+	actions: [addWithDiff, runInstall, runLint],
 
-		const actions = [addWithDiff, runInstall, runESLint];
+	// actions: (data) => {
+	// 	const pnpm = whichPmRuns()?.name === 'pnpm' ? true : false;
+	// 	if (data) {
+	// 		data.gatsbyPnpmPlugin = pnpm;
+	// 	}
+	// 	const addWithDiff: CustomActionConfig<'addWithDiff'> = {
+	// 		type: 'addWithDiff',
+	// 		templates: './templates/gatsby-wp',
+	// 		path: '{{outDir}}',
+	// 		force: data?.force ? Boolean(data.force) : false,
+	// 	};
+	// 	const runESLint: CustomActionConfig<'runLint'> = {
+	// 		type: 'runLint',
+	// 		ignorePattern: data?.ignorePattern
+	// 			? String(data.ignorePattern)
+	// 			: undefined,
+	// 		plugins: data?.plugins ? String(data.plugins) : undefined,
+	// 	};
+	// 	const runInstall: CustomActionConfig<'runInstall'> = {
+	// 		type: 'runInstall',
+	// 	};
 
-		return actions;
-	},
+	// 	const actions = [addWithDiff, runInstall, runESLint];
+
+	// 	return actions;
+	// },
 };

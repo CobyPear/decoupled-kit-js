@@ -1,6 +1,6 @@
 import { decoupledKitGenerators } from '../generators';
 const generatorsList = Object.values(decoupledKitGenerators).map(
-	({ name }) => name,
+	({ name }: { name: string }) => name,
 );
 export const helpMenu = `Usage: create-pantheon-decoupled-kit <generator(s) space separated> [options]
 	

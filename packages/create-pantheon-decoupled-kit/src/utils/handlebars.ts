@@ -76,7 +76,13 @@ const getHelpers = (
 
 /**
  *
+<<<<<<< Updated upstream
  * @param options.rootDir the root dir of the bin script. This is important so we can find the 
+=======
+ * @param options.rootDir the root dir of the script. Used to find the templates.
+ * @param options.helpers custom handlebars helpers to be registered to the
+ * handlebars instance
+>>>>>>> Stashed changes
  * @returns an instance of handlebars with all helpers and partials registered
  */
 const createHandlebarsInstance = async (options: {

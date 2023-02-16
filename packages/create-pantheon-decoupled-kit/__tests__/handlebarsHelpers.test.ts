@@ -1,4 +1,4 @@
-import * as helpers from '../src/utils/handlebarsHelpers';
+import * as helpers from '../src/utils/handlebars';
 
 describe('pkgNameHelper', () => {
 	it('should not transform a valid package.json name', () => {
