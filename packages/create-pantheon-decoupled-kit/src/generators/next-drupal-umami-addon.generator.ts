@@ -20,7 +20,7 @@ export const nextDrupalUmamiAddon: DecoupledKitGenerator<UmamiAddonAnswers> = {
 		ignorePattern: 'test',
 		plugins: 'test234',
 	},
-	templates: ['templates/next-drupal-umami-addon'],
+	templates: ['next-drupal-umami-addon'],
 	actions: [addWithDiff, runLint],
 	// actions: (data) => {
 	// 	const addWithDiff: CustomActionConfig<'addWithDiff'> = {

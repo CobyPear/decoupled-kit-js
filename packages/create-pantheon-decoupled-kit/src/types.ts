@@ -53,12 +53,19 @@ export interface DecoupledKitGenerator<Prompts extends Answers> {
 	addon?: boolean;
 }
 
+export interface TemplateData {
+	templateDirs: string[];
+	addon: boolean;
+}
+
 export type Action = ({
 	data,
-	templates,
+	templateData,
+	handlebars,
 }: {
 	data: Input;
-	templates: string[];
+	templateData: TemplateData[];
+	handlebars: typeof Handlebars;
 }) => Promise<string> | string;
 
 // TODO: what will the action runner look like?
@@ -67,12 +74,14 @@ export type Action = ({
 // and run actions in the most efficient order.
 export type ActionRunner = ({
 	actions,
-	templates,
+	templateData,
 	data,
+	handlebars,
 }: {
 	actions: Action[];
 	data: Input;
-	templates: string[];
+	templateData: TemplateData[];
+	handlebars: typeof Handlebars;
 }) => Promise<string>;
 
 // export type Action = () => Promise<string> | string;

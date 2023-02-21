@@ -13,7 +13,7 @@ const hbsHelpers: { [key: string]: HelperDelegate } = {
 	 * @param txt - handlebars rendered string
 	 * @returns a valid package.json name
 	 */
-	pkgNameHelper: (txt: string): string => {
+	pkgName: (txt: string): string => {
 		// see https://github.com/dword-design/package-name-regex/blob/2fcb7887bdcf2815ce38f51f9bc333101ab2fd31/src/index.js#L1
 		const npmNameRegex =
 			/^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
@@ -76,13 +76,9 @@ const getHelpers = (
 
 /**
  *
-<<<<<<< Updated upstream
- * @param options.rootDir the root dir of the bin script. This is important so we can find the 
-=======
  * @param options.rootDir the root dir of the script. Used to find the templates.
  * @param options.helpers custom handlebars helpers to be registered to the
  * handlebars instance
->>>>>>> Stashed changes
  * @returns an instance of handlebars with all helpers and partials registered
  */
 const createHandlebarsInstance = async (options: {

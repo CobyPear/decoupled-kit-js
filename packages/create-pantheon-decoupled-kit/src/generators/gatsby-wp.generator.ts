@@ -27,7 +27,7 @@ export const gatsbyWp: DecoupledKitGenerator<GatsbyWPAnswers> = {
 	data: {
 		gatsbyPnpmPlugin: pnpm,
 	},
-	templates: ['templates/gatsby-wp'],
+	templates: ['gatsby-wp'],
 	actions: [addWithDiff, runInstall, runLint],
 
 	// actions: (data) => {

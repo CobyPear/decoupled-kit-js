@@ -1,16 +1,10 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import minimist from 'minimist';
-// import nodePlop, { CustomActionFunction, NodePlopAPI } from 'node-plop';
-// import { getPartials } from './utils/getPartials';
-// import { addWithDiff } from './actions/addWithDiff';
-// import { runInstall } from './actions/runInstall';
-// import { runESLint } from './actions/runESLint';
-// import { pkgNameHelper } from './utils/handlebars';
 import { helpMenu } from './utils/helpMenu';
 import type { Answers, QuestionCollection } from 'inquirer';
 import type { ParsedArgs, Opts as MinimistOptions } from 'minimist';
-// import type { DecoupledKitGenerator } from './types';
+import type { TemplateData } from './types';
 import { decoupledKitGenerators } from './generators';
 import { DecoupledKitGenerator } from './types';
 import { actionRunner } from './utils/actionRunner';
@@ -18,11 +12,7 @@ import pkg from '../package.json' assert { type: 'json' };
 import { getHandlebarsInstance } from './utils/handlebars';
 const rootDir = new URL('.', import.meta.url).pathname;
 
-//console.log(hbs);
-
 console.log('generators', decoupledKitGenerators);
-
-// decoupledKitGenerators.forEach((generator) => {});
 
 /**
  *  Parses CLI arguments using `minimist`
@@ -127,12 +117,9 @@ export const main = async (
 	}
 
 	const actions = [];
-	const templates = [];
+	const templateData: TemplateData[] = [];
 	for (const g of generatorsToRun) {
-		// use instance of plop and get the current generator
 		const generator = getGenerator(g);
-		// use inquirer directly for prompts because node-plop does not
-		// play nicely with ParsedArgs and inquirer does <3
 		const answers: Answers = await inquirer.prompt(
 			generator.prompts as QuestionCollection,
 			args,
@@ -142,16 +129,20 @@ export const main = async (
 		Object.assign(args, answers);
 		// if generator data exists, add it to the args object
 		generator.data && Object.assign(args, generator.data);
+		const templateObj: TemplateData = {
+			templateDirs: [...generator.templates],
+			addon: generator?.addon || false,
+		};
 		// if a generator is an addon, note it in an 'addons' section of the args
-		if (generator.addon) {
-			Array.isArray(args.addons)
-				? args.addons.push(generator.name)
-				: (args.addons = [generator.name]);
-		}
+		// if (generator.addon) {
+		// 	Array.isArray(args.addons)
+		// 		? args.addons.push(generator.name)
+		// 		: (args.addons = [generator.name]);
+		// }
 
 		// gather all actions and templates
 		actions.push(...generator.actions);
-		templates.push(...generator.templates);
+		templateData.push(templateObj);
 	}
 	console.debug('data:', args);
 
@@ -161,8 +152,9 @@ export const main = async (
 
 	await actionRunner({
 		actions,
-		templates,
-		data: { ...args, handlebars: hbs },
+		templateData,
+		data: args,
+		handlebars: hbs,
 	});
 };
 await main(parseArgs(), decoupledKitGenerators);

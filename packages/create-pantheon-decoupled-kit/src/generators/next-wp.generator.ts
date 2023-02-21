@@ -22,7 +22,7 @@ export const nextWp: DecoupledKitGenerator<NextWPAnswers> = {
 				`${process.cwd()}/${appName.replaceAll(' ', '-').toLowerCase()}`,
 		},
 	],
-	templates: ['templates/next-wp'],
+	templates: ['next-wp'],
 	actions: [addWithDiff, runInstall, runLint],
 };
 

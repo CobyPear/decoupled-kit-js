@@ -21,7 +21,7 @@ export const nextDrupal: DecoupledKitGenerator<NextDrupalAnswers> = {
 				`${process.cwd()}/${appName.replaceAll(' ', '-').toLowerCase()}`,
 		},
 	],
-	templates: ['templates/next-drupal'],
+	templates: ['next-drupal'],
 	actions: [addWithDiff, runInstall, runLint],
 	// actions: (data) => {
 	// 	const addWithDiff: CustomActionConfig<'addWithDiff'> = {
