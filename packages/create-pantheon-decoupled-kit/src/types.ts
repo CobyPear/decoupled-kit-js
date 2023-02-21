@@ -7,6 +7,11 @@ declare module 'vitest' {
 	}
 }
 
+export interface TemplateData {
+	templateDirs: DecoupledKitGenerator['templates'];
+	addon: boolean;
+}
+
 /**
  * Input from command line arguments and/or prompts
  */
@@ -20,7 +25,7 @@ type DataRecord = {
 /**
  * Generators need prompts to get user data not provided by CLI arguments
  */
-export interface DecoupledKitGenerator<Prompts extends Answers> {
+export interface DecoupledKitGenerator<Prompts extends Answers = Answers> {
 	/**
 	 * Generator's name. This should be kebab case.
 	 */
@@ -53,11 +58,6 @@ export interface DecoupledKitGenerator<Prompts extends Answers> {
 	addon?: boolean;
 }
 
-export interface TemplateData {
-	templateDirs: string[];
-	addon: boolean;
-}
-
 export type Action = ({
 	data,
 	templateData,
@@ -84,6 +84,9 @@ export type ActionRunner = ({
 	handlebars: typeof Handlebars;
 }) => Promise<string>;
 
+export interface MergedPaths {
+	[key: string]: { addon: boolean; base: string };
+}
 // export type Action = () => Promise<string> | string;
 
 // class stuff???
