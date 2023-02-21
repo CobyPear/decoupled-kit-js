@@ -20,14 +20,14 @@ export const runInstall: Action = ({ data }) => {
 
 	data.silent ||
 		console.log(
-			chalk.green('Installing dependencies with'),
-			chalk.bold.white(pkgManager),
-			chalk.green('...'),
+			`${chalk.green('Installing dependencies with')} ${chalk.bold.white(
+				pkgManager,
+			)}${chalk.green('...')}`,
 		);
 	execSync(`${pkgManager} install`, {
 		cwd: data.outDir,
 		encoding: 'utf8',
 		stdio: 'inherit',
 	});
-	return 'success';
+	return `${chalk.cyan('runInstall:')} ${chalk.green('success')}`;
 };

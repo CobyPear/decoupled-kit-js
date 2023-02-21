@@ -1,18 +1,12 @@
 import chalk from 'chalk';
-import inquirer from 'inquirer';
-import minimist from 'minimist';
-import { helpMenu } from './utils/helpMenu';
-import type { Answers, QuestionCollection } from 'inquirer';
-import type { ParsedArgs, Opts as MinimistOptions } from 'minimist';
-import type { TemplateData } from './types';
+import inquirer, { Answers, QuestionCollection } from 'inquirer';
+import minimist, { ParsedArgs, Opts as MinimistOptions } from 'minimist';
 import { decoupledKitGenerators } from './generators';
-import { DecoupledKitGenerator } from './types';
-import { actionRunner } from './utils/actionRunner';
-import pkg from '../package.json' assert { type: 'json' };
-import { getHandlebarsInstance } from './utils/handlebars';
-const rootDir = new URL('.', import.meta.url).pathname;
+import { helpMenu, actionRunner, getHandlebarsInstance } from './utils/index';
+import type { DecoupledKitGenerator, TemplateData } from './types';
 
-console.log('generators', decoupledKitGenerators);
+import pkg from '../package.json' assert { type: 'json' };
+const rootDir = new URL('.', import.meta.url).pathname;
 
 /**
  *  Parses CLI arguments using `minimist`
@@ -129,32 +123,30 @@ export const main = async (
 		Object.assign(args, answers);
 		// if generator data exists, add it to the args object
 		generator.data && Object.assign(args, generator.data);
+
+		// this object is used to deduplicate the templates
 		const templateObj: TemplateData = {
 			templateDirs: [...generator.templates],
 			addon: generator?.addon || false,
 		};
-		// if a generator is an addon, note it in an 'addons' section of the args
-		// if (generator.addon) {
-		// 	Array.isArray(args.addons)
-		// 		? args.addons.push(generator.name)
-		// 		: (args.addons = [generator.name]);
-		// }
 
 		// gather all actions and templates
 		actions.push(...generator.actions);
 		templateData.push(templateObj);
 	}
-	console.debug('data:', args);
-
 	// pass the handlebars instance into data so it is available
 	// to any action that needs it
 	const hbs = await getHandlebarsInstance(rootDir);
-
+	// run the actions
 	await actionRunner({
 		actions,
 		templateData,
 		data: args,
 		handlebars: hbs,
 	});
+	console.log(
+		`Your project was generated with: \n${chalk.cyan(args._.join('\t\n'))}`,
+	);
+	console.log('cd into the outDir to start developing!');
 };
 await main(parseArgs(), decoupledKitGenerators);

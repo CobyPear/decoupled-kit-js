@@ -8,24 +8,17 @@ export const actionRunner: ActionRunner = async ({
 	data,
 	handlebars,
 }) => {
-	// const actionsPath = path.resolve('..', 'actions');
+	// remove duplicate actions
 	actions = [...new Set(actions)];
-	console.debug('actions', actions);
-	console.debug('templateData:', templateData);
-	console.debug('data:', data);
-	// const templates = templateData.map(({ templateDirs }) => templateDirs);
-
+	// run each action sequentially
 	try {
 		for await (const action of actions) {
-			console.debug(
-				'action:',
-				action,
-				await action({ data, templateData, handlebars }),
-			);
+			const result = await action({ data, templateData, handlebars });
+			console.log(result);
 		}
-		return '';
+		return 'Actions successfully completed.';
 	} catch (error) {
-		console.log(chalk.red('Something went wrong'));
+		console.log(chalk.red('Something went wrong: '));
 		console.error(error);
 		throw error;
 	}

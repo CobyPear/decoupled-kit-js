@@ -5,9 +5,7 @@ import path from 'path';
 import whichPmRuns from 'which-pm-runs';
 import { Action, isString } from '../types';
 
-export const runLint: Action = async ({
-	data: { ignorePattern, plugins, ...data },
-}) => {
+export const runLint: Action = async ({ data }) => {
 	if (data?.noInstall || data?.noLint) return 'skipping linting';
 	if (!data.outDir || !isString(data?.outDir)) throw 'fail: outDir required';
 	data.silent || console.log(chalk.green('Linting...'));
@@ -44,5 +42,5 @@ export const runLint: Action = async ({
 		console.error(error);
 		throw 'fail: there was a problem linting';
 	}
-	return 'runLint: success';
+	return `${chalk.cyan('runLint:')} ${chalk.green('success')}`;
 };

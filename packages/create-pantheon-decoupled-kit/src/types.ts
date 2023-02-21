@@ -8,7 +8,7 @@ declare module 'vitest' {
 }
 
 export interface TemplateData {
-	templateDirs: DecoupledKitGenerator['templates'];
+	templateDirs: string[];
 	addon: boolean;
 }
 
@@ -25,7 +25,7 @@ type DataRecord = {
 /**
  * Generators need prompts to get user data not provided by CLI arguments
  */
-export interface DecoupledKitGenerator<Prompts extends Answers = Answers> {
+export interface DecoupledKitGenerator<Prompts extends Answers> {
 	/**
 	 * Generator's name. This should be kebab case.
 	 */
@@ -58,6 +58,10 @@ export interface DecoupledKitGenerator<Prompts extends Answers = Answers> {
 	addon?: boolean;
 }
 
+/**
+ * An action that takes in the data, templates, and an instance of handlebars
+ * and does an action, like installing dependencies or formatting generated code
+ */
 export type Action = ({
 	data,
 	templateData,
@@ -68,10 +72,6 @@ export type Action = ({
 	handlebars: typeof Handlebars;
 }) => Promise<string> | string;
 
-// TODO: what will the action runner look like?
-// shape of actions may determine this
-// it should pool all action configs, dedupe templates,
-// and run actions in the most efficient order.
 export type ActionRunner = ({
 	actions,
 	templateData,
@@ -87,20 +87,6 @@ export type ActionRunner = ({
 export interface MergedPaths {
 	[key: string]: { addon: boolean; base: string };
 }
-// export type Action = () => Promise<string> | string;
-
-// class stuff???
-// abstract class Action {
-// 	const config;
-// 	constructor(config) {
-// 		this.config=config
-// 	}
-// 	run: (config) => Promise<string> | string;
-// }
-
-// abstract class ActionFactory<Config extends BaseConfig> {
-// 	create: (config: Config)
-// }
 
 // TYPE PREDICATES
 
