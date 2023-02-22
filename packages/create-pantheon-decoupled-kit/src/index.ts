@@ -1,3 +1,5 @@
+// TODO: This file will have some funky types until
+// the generators are ported over.
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import minimist from 'minimist';
@@ -6,46 +8,35 @@ import { getPartials } from './utils/getPartials';
 import { addWithDiff } from './actions/addWithDiff';
 import { runInstall } from './actions/runInstall';
 import { runESLint } from './actions/runESLint';
-import { pkgNameHelper } from './utils/handlebarsHelpers';
 import { helpMenu } from './utils/helpMenu';
+import { getHandlebarsInstance } from './utils';
 import type { Answers, QuestionCollection } from 'inquirer';
 import type { ParsedArgs, Opts as MinimistOptions } from 'minimist';
 import type { DecoupledKitGenerator } from './types';
 import pkg from '../package.json' assert { type: 'json' };
 
 const __filename = new URL('.', import.meta.url).pathname;
-/**
- * Set generator based on exports from src/generators
- * @param generators An array of plop Generators with an added name field. @see {@link DecoupledKitGenerator}.
- * @returns An instance of plop @see {@link NodePlopAPI}
- */
-export const setGenerators = async (
-	generators: DecoupledKitGenerator[],
-): Promise<NodePlopAPI> => {
-	const plop = await nodePlop();
-	for (const generator of Object.values(generators)) {
-		plop.setGenerator(generator.name, generator);
-	}
-	// Living with the type coercion here since we're close enough and it doesn't break.
-	// We could go around plop when running actions
-	// but this way we are still able to run valid plop generators
-	[
-		{ name: 'addWithDiff', action: addWithDiff },
-		{ name: 'runInstall', action: runInstall },
-		{ name: 'runLint', action: runESLint },
-	].forEach(({ name, action }) => {
-		plop.setActionType(name, action as CustomActionFunction);
-	});
-	// register handlebars partials to the plop instance
-	const hbsPartials = await getPartials(__filename);
-	hbsPartials.forEach(({ name, partial }) => plop.setPartial(name, partial));
 
-	// register handlebars helpers to the lop instance
-	[{ name: 'pkgName', helper: pkgNameHelper }].forEach(({ name, helper }) =>
-		plop.setHelper(name, helper),
+// unknown for now, until generators are refactored
+const getGeneratorList = (generators: unknown) => {
+	// temporary type coercion
+	return (generators as { name: string }[]).map(
+		({ name }: { name: string }) => ({ name }),
 	);
+};
 
-	return plop;
+const getGenerator = ({
+	generatorName,
+	decoupledKitGenerators,
+}: {
+	generatorName: string;
+	// TODO: temporary type, use proper type when porting in
+	// generators
+	decoupledKitGenerators: { [key: string]: string }[];
+}) => {
+	return (
+		decoupledKitGenerators.find(({ name }) => name === generatorName) || ''
+	);
 };
 
 /**
@@ -80,23 +71,21 @@ export const parseArgs = (
  */
 export const main = async (
 	args: ParsedArgs,
-	DecoupledKitGenerators: DecoupledKitGenerator[],
+	decoupledKitGenerators: unknown,
 ): Promise<void> => {
-	// get the node-plop instance
-	const plop = await setGenerators(DecoupledKitGenerators);
-	// without setting the plopfile path, the templates can't be found
-	// when trying to run the actions
-	plop.setPlopfilePath(__filename);
+	if (args['help'] || args['h']) {
+		return console.log(helpMenu);
+	}
+	if (args['version'] || args['v']) {
+		return console.log(`v${pkg.version}`);
+	}
+
 	// get a list of generators to map against positional arguments from the cli
-	const generators = plop.getGeneratorList();
+	const generators = getGeneratorList(decoupledKitGenerators);
 	// take positional params from minimist args and
-	// parse them for matching generator names
+	// check them against valid generators
 	const foundGenerators = args._.filter((arg) => {
-		if (
-			generators.find(({ name }) => {
-				return arg.toString() === name.toString();
-			})
-		) {
+		if (generators.find(({ name }) => arg === name)) {
 			return arg;
 		}
 		args.silent ||
@@ -104,16 +93,8 @@ export const main = async (
 		return;
 	});
 
-	if (args['help'] || args['h']) {
-		return console.log(helpMenu);
-	}
+	const generatorsToRun: string[] = [];
 
-	if (args['v'] || args['version']) {
-		return console.log(`v${pkg.version}`);
-	}
-
-	// remove the positional parameters
-	const generatorsToRun = [];
 	// If no generators are found in positional params
 	// ask which generators should be run
 	if (!foundGenerators.length) {
@@ -125,9 +106,10 @@ export const main = async (
 			choices: () => generatorNames,
 		};
 		const answers = await inquirer.prompt(whichGenerators);
-		Array.isArray(answers?.generators) &&
+		if (Array.isArray(answers?.generators)) {
 			generatorsToRun.push(...answers.generators);
-		Array.isArray(answers?.generators) && args._.push(...answers.generators);
+			args._.push(...answers.generators);
+		}
 	} else {
 		generatorsToRun.push(...foundGenerators);
 	}
@@ -141,13 +123,10 @@ export const main = async (
 			);
 	}
 
-	for (const generator of generatorsToRun) {
-		// use instance of plop and get the current generator
-		const plopGenerator = plop.getGenerator(generator);
-		// use inquirer directly for prompts because node-plop does not
-		// play nicely with ParsedArgs and inquirer does <3
+	for (const g of generatorsToRun) {
+		const generator = getGenerator(g);
 		const answers: Answers = await inquirer.prompt(
-			plopGenerator.prompts as QuestionCollection,
+			generator.prompts as QuestionCollection,
 			args,
 		);
 

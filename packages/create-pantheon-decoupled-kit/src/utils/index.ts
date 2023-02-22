@@ -1,2 +1,2 @@
+export * from './handlebars';
 export { getPartials } from './getPartials';
-export * from './handlebarsHelpers';
