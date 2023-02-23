@@ -1,4 +1,4 @@
-import * as actions from '../src/actions/runESLint';
+import * as actions from '../src/actions/runLint';
 import * as nodePlop from 'node-plop';
 import whichPMRuns from 'which-pm-runs';
 import { execSync } from 'child_process';

@@ -2,67 +2,69 @@ import chalk from 'chalk';
 import { diffLines, diffJson } from 'diff';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
-import klaw from 'klaw';
 import path from 'path';
-import type { Answers, QuestionCollection } from 'inquirer';
-import type { CustomActionConfig, NodePlopAPI } from 'node-plop';
+import { dedupeTemplates } from '../utils/dedupeTemplates';
+import { isString } from '../types';
+import type { QuestionCollection } from 'inquirer';
+import type { Action, MergedPaths } from '../types';
 
-export const addWithDiff = async (
-	answers: Answers,
-	config: CustomActionConfig<'addWithDiff'> & {
-		templates: string;
-		path: string;
-	},
-	plop: NodePlopAPI,
-) => {
-	/**
-	 * 1. get path to the templates
-	 * 2. klaw through templates (outputs each path in the directory given)
-	 * 3. check if the destination path exists or create it. (path to destination + template name minus .hbs) example: ./test/myTest.js
-	 * 4. check the diff against the new file and the rendered template or file to copy if source is not a handlebars template
-	 * 5. if the --force option is not defined, ask the user if we should overwrite this file (yes to all, yes, skip, abort) if force is true we write everything.
-	 * 6. skip or write the file based on input. If yes to all, set force to true.
-	 */
+const rootDir = new URL('.', import.meta.url).pathname;
 
-	const filesToCopyRegex =
-		/(gif|jpg|jpeg|tiff|png|svg|ashx|ico|pdf|jar|eot|woff|ttf|woff2)$/;
+/**
+ * 1. dedupe the templates, favoring addons in case 2 paths collide
+ * 2. check if the destination path exists or create it. (path to destination + template name minus .hbs) example: ./test/myTest.js
+ * 3. check the diff against the new file and the rendered template or file to copy if source is not a handlebars template
+ * 4. if the --force option is not defined, ask the user if we should overwrite this file (yes to all, yes, skip, abort) if force is true we write everything.
+ * 5. skip or write the file based on input. If yes to all, set force to true.
+ */
+export const addWithDiff: Action = async ({
+	data,
+	templateData,
+	handlebars,
+}) => {
+	if (!isString(data.outDir)) throw new Error('outDir is not valid');
+
 	const outcomes: { [key: string]: string[] } = {
 		written: [],
 		skipped: [],
 		sameContent: [],
 	};
-	const templateDir: string = path.resolve(
-		plop.getPlopfilePath(),
-		config.templates,
-	);
-	const destinationDir = plop.renderString(config.path, answers);
 
-	for await (const file of klaw(templateDir)) {
-		const targetPath = file.path.replace(templateDir, '').replace(/^\//, '');
-		let target = path.resolve(process.cwd(), destinationDir, targetPath);
-		if (file.stats.isDirectory()) {
-			fs.ensureDirSync(path.resolve(target));
-			continue;
-		}
-		const fileName = path.basename(file.path);
-		// sourceContents will be a rendered template if the source file is a handlebars template
-		// otherwise we will use the contents of that file with no rendering
+	const filesToCopyRegex =
+		/(gif|jpg|jpeg|tiff|png|svg|ashx|ico|pdf|jar|eot|woff|ttf|woff2)$/;
+	const templatesToRender: MergedPaths = await dedupeTemplates(templateData);
+	const destinationDir = path.resolve(rootDir, data.outDir);
+
+	for await (const template of Object.keys(templatesToRender)) {
+		// the template directory
+		const templatesBaseDir = templatesToRender[template].base;
+		// the path to the template to be rendered
+		const templatePath = path.join(
+			rootDir,
+			'templates',
+			templatesBaseDir,
+			template,
+		);
+		// the destination of the file that is to be rendered
+		let target = path.join(destinationDir, template);
+		// // sourceContents will be a rendered template if the source file is a handlebars template
+		// // otherwise we will use the contents of that file with no rendering
 		let sourceContents: string;
-		if (fileName.endsWith('.hbs')) {
+		if (templatePath.endsWith('.hbs')) {
 			target = target.replace(/\.hbs$/, '');
-			// get the contents of the template
-			sourceContents = plop.renderString(
-				fs.readFileSync(file.path, 'utf-8'),
-				answers,
-			);
+			// 	// get the contents of the template
+			const temp = handlebars.compile(fs.readFileSync(templatePath, 'utf-8'));
+			sourceContents = temp(data);
+		} else if (!filesToCopyRegex.test(target)) {
+			sourceContents = fs.readFileSync(templatePath, 'utf-8');
 		} else {
-			sourceContents = fs.readFileSync(file.path, 'utf-8');
+			sourceContents = '';
 		}
-		if (!answers.force ?? !config.force) {
-			const fileDidExist = fs.existsSync(target);
-			// ensure the file exists or readFileSync errors.
-			// We could swallow the error with a try/catch, but this feels a bit cleaner to me.
-			!fileDidExist && fs.createFileSync(target);
+		const fileDidExist = fs.existsSync(target);
+		// ensure the file exists or readFileSync errors.
+		// We could swallow the error with a try/catch, but this feels a bit cleaner to me.
+		!fileDidExist && fs.createFileSync(target);
+		if (!data.force) {
 			// get the contents of file at 'target' if there is any
 			const targetContents = fs.readFileSync(target, 'utf-8');
 			// if the target and source are the same, skip diffing or writing the file
@@ -73,7 +75,7 @@ export const addWithDiff = async (
 			// do the diff
 			const changes = target.endsWith('.json')
 				? diffJson(targetContents, sourceContents)
-				: filesToCopyRegex.test(target)
+				: filesToCopyRegex.test(templatePath)
 				? []
 				: diffLines(targetContents, sourceContents);
 			console.log(chalk.bold(`Listing changes for ${chalk.magenta(target)}:`));
@@ -84,7 +86,6 @@ export const addWithDiff = async (
 					? chalk.red
 					: chalk.gray;
 				const prefix = change.added ? '+' : change.removed ? '-' : '=';
-
 				change.value.split('\n').forEach((value) => {
 					if (!value) return;
 					console.log(color(`${prefix} ${value}`));
@@ -101,12 +102,13 @@ export const addWithDiff = async (
 				)}`,
 			};
 			const answer = await inquirer.prompt(q);
-
+			// If the target file matches the filesToCopyRegex, the file is binary
+			// and we copy it over without a diff
 			switch (answer.writeFile) {
 				case 'yes':
 					filesToCopyRegex.test(target)
-						? fs.copyFileSync(file.path, target)
-						: fs.writeFileSync(target, sourceContents);
+						? fs.writeFileSync(target, sourceContents)
+						: fs.copyFileSync(templatePath, target);
 					outcomes.written.push(target);
 					break;
 				case 'skip':
@@ -116,14 +118,14 @@ export const addWithDiff = async (
 					outcomes.skipped.push(target);
 					break;
 				case 'yes to all':
-					answers.force = true;
+					data.force = true;
 					outcomes.written.push(target);
 					filesToCopyRegex.test(target)
-						? fs.copyFileSync(file.path, target)
+						? fs.copyFileSync(templatePath, target)
 						: fs.writeFileSync(target, sourceContents, 'utf-8');
 					break;
 				case 'abort':
-					answers.silent || console.log(chalk.red('Aborting!'));
+					data.silent || console.log(chalk.red('Aborting!'));
 					return process.exit();
 				default:
 					break;
@@ -131,13 +133,13 @@ export const addWithDiff = async (
 		} else {
 			// if force is true, write the file no questions asked.
 			filesToCopyRegex.test(target)
-				? fs.copyFileSync(file.path, target)
+				? fs.copyFileSync(templatePath, target)
 				: fs.writeFileSync(target, sourceContents, 'utf-8');
 			outcomes.written.push(target);
 		}
 	}
 
-	answers.silent ||
+	data.silent ||
 		console.log(`
 	Written: 
 	\t${chalk.green(outcomes.written.join('\n\t\t') || 'none')}
@@ -146,5 +148,5 @@ export const addWithDiff = async (
 	Skipped (same content): 
 	\t${chalk.gray(outcomes.sameContent.join('\n\t\t') || 'none')}
 	`);
-	return 'success';
+	return `${chalk.cyan('addWithDiff:')} ${chalk.green('success')}`;
 };

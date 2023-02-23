@@ -27,7 +27,7 @@ const hbsHelpers: { [key: string]: HelperDelegate } = {
 					.replace(/[\s_]+/g, '-')
 					.toLowerCase();
 	},
-} as const;
+};
 
 /**
  * Gathers all handlebars templates in `${rootDir}/templates/partials`

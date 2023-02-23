@@ -1,7 +1,11 @@
-import type { CustomActionConfig } from 'node-plop';
+import { addWithDiff, runLint } from '../actions';
 import type { DecoupledKitGenerator } from '../types';
 
-export const nextWpAcfAddon: DecoupledKitGenerator = {
+interface NextWPACFAnswers {
+	outDir: string;
+}
+
+export const nextWpAcfAddon: DecoupledKitGenerator<NextWPACFAnswers> = {
 	name: 'next-wp-acf-addon',
 	description:
 		'Example implementation of the WordPress Advanced Custom Fields plugin for the next-wordpress starter',
@@ -9,22 +13,9 @@ export const nextWpAcfAddon: DecoupledKitGenerator = {
 		{
 			name: 'outDir',
 			message: 'Where should the output go?',
-			default: `${process.cwd()}/acf-demo`,
+			default: `${process.cwd()}/next-wp-acf-addon`,
 		},
 	],
-	actions: (data) => {
-		const addWithDiff: CustomActionConfig<'addWithDiff'> = {
-			type: 'addWithDiff',
-			templates: './templates/next-wp-acf-addon',
-			path: '{{outDir}}',
-			force: data?.force ? Boolean(data.force) : false,
-		};
-		const runESLint: CustomActionConfig<'runLint'> = {
-			type: 'runLint',
-		};
-
-		const actions = [addWithDiff, runESLint];
-
-		return actions;
-	},
+	templates: ['next-wp-acf-addon'],
+	actions: [addWithDiff, runLint],
 };

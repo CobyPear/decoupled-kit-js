@@ -1,5 +1,5 @@
 // import like this so we can vi.spyOn
-import * as bin from '../src/index';
+import * as bin from '../src/index.old';
 const { parseArgs, main } = bin;
 import { decoupledKitTestGenerators } from './testGenerators/generators/index';
 import inquirer from 'inquirer';

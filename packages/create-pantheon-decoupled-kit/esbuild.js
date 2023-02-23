@@ -2,13 +2,13 @@ import { build } from 'esbuild';
 import chalk from 'chalk';
 /** @type {import('esbuild').BuildOptions} */
 const buildOptions = {
-	entryPoints: ['./src/bin.ts'],
+	entryPoints: ['./src/index.ts'],
 	bundle: true,
 	platform: 'node',
 	packages: 'external',
 	outdir: 'dist',
 	format: 'esm',
-	minify: true,
+	minify: false,
 	target: 'node16',
 	supported: {
 		'import-assertions': true,
