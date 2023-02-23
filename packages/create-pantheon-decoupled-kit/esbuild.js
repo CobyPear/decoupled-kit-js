@@ -2,7 +2,7 @@ import { build } from 'esbuild';
 import chalk from 'chalk';
 /** @type {import('esbuild').BuildOptions} */
 const buildOptions = {
-	entryPoints: ['./src/index.ts'],
+	entryPoints: ['./src/bin.ts'],
 	bundle: true,
 	platform: 'node',
 	packages: 'external',

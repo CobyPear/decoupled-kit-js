@@ -11,15 +11,15 @@ export const actionRunner: ActionRunner = async ({
 	// remove duplicate actions
 	actions = [...new Set(actions)];
 	// run each action sequentially
-	try {
-		for await (const action of actions) {
+	for await (const action of actions) {
+		try {
 			const result = await action({ data, templateData, handlebars });
 			console.log(result);
+		} catch (error) {
+			console.log(chalk.red('Something went wrong: '));
+			console.error(error);
+			throw error;
 		}
-		return 'Actions successfully completed.';
-	} catch (error) {
-		console.log(chalk.red('Something went wrong: '));
-		console.error(error);
-		throw error;
 	}
+	return 'Actions successfully completed.';
 };

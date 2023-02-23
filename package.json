@@ -27,6 +27,7 @@
 		"build:starters": "pnpm --filter './starters/**' build",
 		"ci:publish": "changeset publish",
 		"ci:version": "changeset version",
+		"dev:cli": "pnpm --filter create-pantheon-decoupled-kit dev",
 		"dev:gatsby-wp": "pnpm --filter './starters/gatsby-wordpress-starter' develop",
 		"dev:next-drupal": "pnpm --filter './starters/next-drupal-starter' dev",
 		"dev:next-wp": "pnpm --filter './starters/next-wordpress-starter' dev",

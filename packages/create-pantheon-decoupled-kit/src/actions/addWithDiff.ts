@@ -33,7 +33,7 @@ export const addWithDiff: Action = async ({
 	const filesToCopyRegex =
 		/(gif|jpg|jpeg|tiff|png|svg|ashx|ico|pdf|jar|eot|woff|ttf|woff2)$/;
 	const templatesToRender: MergedPaths = await dedupeTemplates(templateData);
-	const destinationDir = path.resolve(rootDir, data.outDir);
+	const destinationDir = path.resolve(process.cwd(), data.outDir);
 
 	for await (const template of Object.keys(templatesToRender)) {
 		// the template directory
@@ -55,10 +55,8 @@ export const addWithDiff: Action = async ({
 			// 	// get the contents of the template
 			const temp = handlebars.compile(fs.readFileSync(templatePath, 'utf-8'));
 			sourceContents = temp(data);
-		} else if (!filesToCopyRegex.test(target)) {
-			sourceContents = fs.readFileSync(templatePath, 'utf-8');
 		} else {
-			sourceContents = '';
+			sourceContents = fs.readFileSync(templatePath, 'utf-8');
 		}
 		const fileDidExist = fs.existsSync(target);
 		// ensure the file exists or readFileSync errors.

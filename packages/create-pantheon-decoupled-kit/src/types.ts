@@ -8,21 +8,6 @@ declare module 'vitest' {
 	}
 }
 
-export interface TemplateData {
-	templateDirs: string[];
-	addon: boolean;
-}
-
-/**
- * Input from command line arguments and/or prompts
- */
-export type Input = ParsedArgs & Answers;
-
-type DataMember = string | number | boolean;
-type DataRecord = {
-	[key: string]: DataMember | Record<string, DataRecord>;
-};
-
 /**
  * Generators need prompts to get user data not provided by CLI arguments
  */
@@ -63,31 +48,37 @@ export interface DecoupledKitGenerator<Prompts extends Answers> {
  * An action that takes in the data, templates, and an instance of handlebars
  * and does an action, like installing dependencies or formatting generated code
  */
-export type Action = ({
-	data,
-	templateData,
-	handlebars,
-}: {
-	data: Input;
-	templateData: TemplateData[];
-	handlebars: typeof Handlebars;
-}) => Promise<string> | string;
+export type Action = (config: ActionConfig) => Promise<string> | string;
 
-export type ActionRunner = ({
-	actions,
-	templateData,
-	data,
-	handlebars,
-}: {
-	actions: Action[];
-	data: Input;
-	templateData: TemplateData[];
-	handlebars: typeof Handlebars;
-}) => Promise<string>;
+export type ActionRunner = (config: ActionRunnerConfig) => Promise<string>;
+
+/**
+ * Input from command line arguments and/or prompts
+ */
+export type Input = ParsedArgs & Answers;
+
+export interface TemplateData {
+	templateDirs: string[];
+	addon: boolean;
+}
 
 export interface MergedPaths {
 	[key: string]: { addon: boolean; base: string };
 }
+interface ActionConfig {
+	data: Input;
+	templateData: TemplateData[];
+	handlebars: typeof Handlebars;
+}
+
+interface ActionRunnerConfig extends ActionConfig {
+	actions: Action[];
+}
+
+type DataMember = string | number | boolean;
+type DataRecord = {
+	[key: string]: DataMember | Record<string, DataRecord>;
+};
 
 // TYPE PREDICATES
 

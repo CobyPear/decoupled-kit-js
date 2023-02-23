@@ -54,7 +54,17 @@ const getGenerator = (generatorName: string) => {
 export const main = async (
 	args: ParsedArgs,
 	DecoupledKitGenerators: typeof decoupledKitGenerators,
-): Promise<void> => {
+): Promise<void | Error> => {
+	// display the help menu
+	if (args['help'] || args['h']) {
+		return console.log(helpMenu(DecoupledKitGenerators));
+	}
+
+	// display the current version
+	if (args['v'] || args['version']) {
+		return console.log(`v${pkg.version}`);
+	}
+
 	// get a list of generators to map against positional arguments from the cli
 	const generators = getGeneratorList(DecoupledKitGenerators);
 	// take positional params from minimist args and
@@ -90,12 +100,11 @@ export const main = async (
 	}
 
 	if (!generatorsToRun.length) {
-		args.silent ||
-			console.error(
-				chalk.red(
-					'No generators were selected. Use positional arguments or choose from the prompt.',
-				),
-			);
+		return new Error(
+			chalk.red(
+				'No generators were selected. Use positional arguments or choose from the prompt.',
+			),
+		);
 	}
 
 	const actions = [];
@@ -132,9 +141,15 @@ export const main = async (
 		data: args,
 		handlebars: hbs,
 	});
-	console.log(
-		`Your project was generated with: \n${chalk.cyan(args._.join('\t\n'))}`,
-	);
-	console.log('cd into the outDir to start developing!');
+	args.silent ||
+		console.log(
+			chalk.bgGreen.black('Your project was generated with:'),
+			`\n\t${chalk.cyan(args._.join('\n\t'))}`,
+		);
+	args.silent ||
+		console.log(
+			`${chalk.yellow('cd')} into ${chalk.bold.magenta(
+				args.outDir,
+			)} to start developing!`,
+		);
 };
-await main(parseArgs(), decoupledKitGenerators);
