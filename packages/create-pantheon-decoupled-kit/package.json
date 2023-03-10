@@ -29,7 +29,7 @@
 		"entryPoint": "./index.ts"
 	},
 	"scripts": {
-		"build": "pnpm clean && node ./esbuild.js && pnpm copy-templates",
+		"build": "pnpm clean && pnpm get-versions && node ./esbuild.js && pnpm copy-templates",
 		"clean": "pnpm rimraf ./dist",
 		"copy-templates": "pnpm tsx ./scripts/copyTemplates.ts",
 		"dev": "node ./dist/bin.js",
@@ -40,7 +40,8 @@
 		"eslint:fix": "eslint --ext .ts --fix --ignore-path .gitignore",
 		"prettier": "prettier \"**/*.{js,ts,jsx,tsx,md}\" --check --ignore-path ../../.prettierignore",
 		"prettier:fix": "prettier \"**/*.{js,ts,jsx,tsx,md}\" --write --ignore-path ../../.prettierignore",
-		"lint-staged": "lint-staged"
+		"lint-staged": "lint-staged",
+		"get-versions": "pnpm tsx ./scripts/getVersions.ts"
 	},
 	"devDependencies": {
 		"@pantheon-systems/eslint-config": "*",

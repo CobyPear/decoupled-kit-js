@@ -1,0 +1,7 @@
+{
+  "cms-kit": "0.2.1-canary.0",
+  "create-pantheon-decoupled-kit": "0.4.0-canary.2",
+  "drupal-kit": "4.2.1-canary.0",
+  "nextjs-kit": "1.7.1-canary.0",
+  "wordpress-kit": "2.14.1-canary.0"
+}
