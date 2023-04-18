@@ -15,6 +15,6 @@ public
 *.d.ts
 
 # handlebars templates
-*.hbs
+# *.hbs
 **/__tests__/fixtures/**
-**/create-pantheon-decoupled-kit/src/templates/**
+# **/create-pantheon-decoupled-kit/src/templates/**

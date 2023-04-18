@@ -1,7 +1,7 @@
 {
-	"name": "@pantheon-systems/workspace-configs",
+	"name": "@pantheon-systems/prettier-plugin-pdk",
 	"version": "0.0.0",
-	"description": "Pantheon Decoupled Kit's Configs",
+	"description": "Pantheon Decoupled Kit's Prettier Plugin",
 	"license": "GPL-3.0-or-later",
 	"private": true,
 	"homepage": "https://github.com/pantheon-systems/decoupled-kit-js#readme",
@@ -12,18 +12,18 @@
 	},
 	"author": "@pantheon-systems",
 	"files": [
-		"./prettier.config.js",
-		"./lint-staged.config.js"
+		"./index.js",
+		"./prettier-parser.js"
 	],
 	"prettier": "@pantheon-systems/workspace-configs/prettier",
-	"exports": {
-		"./prettier": "./prettier.config.js",
-		"./lint-staged": "./lint-staged.config.js"
-	},
+	"main": "./index.js",
 	"peerDependencies": {
 		"prettier": ">=2.5.1"
 	},
 	"devDependencies": {
-		"@pantheon-systems/prettier-plugin-pdk": "*"
+		"@pantheon-systems/workspace-configs": "*"
+	},
+	"dependencies": {
+		"@handlebars/parser": "^2.1.0"
 	}
 }

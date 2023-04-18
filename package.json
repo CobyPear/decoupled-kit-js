@@ -57,6 +57,7 @@
 		"@changesets/cli": "^2.26.1",
 		"@pantheon-systems/eslint-config-decoupled-kit": "workspace:*",
 		"@pantheon-systems/workspace-configs": "workspace:*",
+		"@pantheon-systems/prettier-plugin-pdk": "workspace:*",
 		"@types/eslint": "^8.37.0",
 		"@types/jest": "^29.5.0",
 		"@types/node": "^18.15.11",

@@ -1,3 +1,5 @@
+const processor = require('./preprocess');
+
 module.exports = {
 	root: true,
 	parser: '@typescript-eslint/parser',
@@ -12,6 +14,12 @@ module.exports = {
 		'plugin:@typescript-eslint/recommended',
 		'plugin:@typescript-eslint/recommended-requiring-type-checking',
 	],
+	// overrides: [
+	// 	{
+	// 		files: ['*.hbs'],
+	// 		parser: './preprocess'
+	// 	},
+	// ],
 	ignorePatterns: [
 		'main.ts',
 		'*.test.*',
@@ -23,6 +31,6 @@ module.exports = {
 		'jest.config.*',
 		'lint-staged.config.*',
 		'/dist',
-		'/node_modules'
+		'/node_modules',
 	],
 };
