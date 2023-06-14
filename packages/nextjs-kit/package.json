@@ -13,14 +13,17 @@
 	"files": [
 		"dist/*"
 	],
-	"types": "./dist/index.d.ts",
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
+	"types": "./dist/types.d.ts",
 	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.mjs",
-			"require": "./dist/index.js"
+		"./utils/*": {
+			"types": "./dist/utils/*.d.ts",
+			"import": "./dist/utils/*.mjs",
+			"require": "./dist/utils/*.js"
+		},
+		"./components/*": {
+			"types": "./dist/components/*.d.ts",
+			"import": "./dist/components/*.mjs",
+			"require": "./dist/components/*.js"
 		},
 		"./style.css": "./dist/style.css"
 	},
