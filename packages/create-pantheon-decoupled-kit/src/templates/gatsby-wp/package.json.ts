@@ -48,6 +48,7 @@ const json: TemplateFn = ({ data, utils }) => /* JSON */ `{
 		}",
 		"@pantheon-systems/eslint-config-decoupled-kit": "${data.eslintVersion}",
 		"@pantheon-systems/wordpress-kit": "${data.wordpressKitVersion}",
+		"@pantheon-systems/react-kit": "${data.reactKitVersion}",
 		"@testing-library/react": "14.0.0",
 		"@types/dompurify": "^3.0.2",
 		"@types/gatsbyjs__reach-router": "^2.0.0",

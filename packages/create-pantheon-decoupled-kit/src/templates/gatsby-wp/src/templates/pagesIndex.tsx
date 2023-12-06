@@ -3,7 +3,6 @@ import { PageGrid } from '../components/grid';
 import Layout from '../components/layout';
 import Paginator from '../components/paginator';
 import Seo from '../components/seo';
-import * as styles from './pagesOrPostsIndex.module.css';
 
 const PageIndexTemplate = ({
 	pageContext: { pages, routing, itemsPerPage },
@@ -26,8 +25,8 @@ const PageIndexTemplate = ({
 
 	return (
 		<Layout>
-			<header className={styles.header}>
-				<h1 className={styles.headerTitle}>Pages</h1>
+			<header className="mt-12 text-center">
+				<h1 className="font-extrabold text-6xl">Pages</h1>
 			</header>
 			<div>
 				<section>

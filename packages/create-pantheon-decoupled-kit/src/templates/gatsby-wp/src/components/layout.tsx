@@ -1,6 +1,6 @@
-import { Link } from 'gatsby';
+import { Row } from '@pantheon-systems/react-kit/components/Row';
 import Footer from './footer';
-import * as styles from './layout.module.css';
+import Header from './header';
 
 const Layout = ({
 	isHomePage = false,
@@ -9,26 +9,19 @@ const Layout = ({
 	isHomePage?: boolean;
 	children: React.ReactNode;
 }) => {
-	const navItems = [
-		['🏠 Home', '/'],
-		['📰 Posts', '/posts'],
-		['📑 Pages', '/pages'],
-		['⚛️ Examples', '/examples'],
-	];
 	return (
-		<div className={styles.layout} data-is-root-path={isHomePage}>
-			<nav>
-				<ul className={styles.navLinks}>
-					{navItems.map(([title, href], i) => (
-						<li key={`key-${i}`}>
-							<Link className={styles.links} to={href}>
-								{title}
-							</Link>
-						</li>
-					))}
-				</ul>
-			</nav>
-			<main className={styles.layoutMain}>{children}</main>
+		<div
+			className={'bg-white min-w-full w-full min-h-screen flex flex-col'}
+			data-is-root-path={isHomePage}
+		>
+			<Row
+				className="text-neutral-900 max-w-[1920px] mx-auto mb-auto"
+				type="flex"
+				flexOptions={{ direction: 'col' }}
+			>
+				<Header />
+				<main className="mb-auto mx-auto">{children}</main>
+			</Row>
 			<Footer />
 		</div>
 	);
